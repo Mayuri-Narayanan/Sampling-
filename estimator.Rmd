@@ -1,0 +1,256 @@
+---
+title: "Lab 7- Regression and ratio estimator"
+author: "A.Mayuri(2348133)"
+date: "2023-09-19"
+output: word_document
+---
+# Question:
+Mr. John selected a random sample using SRSWOR procedure of 21 states from a population
+of 50 states of a country. He collected information about the real estate farm loans and
+nonreal
+estate farm loans from the selected states given below. Now, Mr. John wants to estimate the
+average real estate farm loans assuming that the average nonreal
+estate farm loans in the country is known and is equal to $878.16. Use the ratio and
+regression estimators and give the estimates for this data set and discuss the
+95% confidence interval. Also compare the results obtained using Ratio estimator and
+suggest the more efficient method to give estimate for this data set.
+
+
+## Variable of Interest
+x-Nonreal estate farm loans
+y-Real estate farm loans
+
+## Definition:
+Ratio estimator:The ratio estimator is a statistical estimator for the ratio of means of two random variables. Ratio estimates are biased and corrections must be made when they are used in experimental or survey work. The ratio estimates are asymmetrical and symmetrical tests such as the t test should not be used to generate confidence intervals
+
+
+Regression estimator:The ratio method of estimation uses the auxiliary information which is correlated with the study
+variable to improve the precision which results in the improved estimators when the regression of Y on
+X is linear and passes through the origin. When the regression of Y on X is linear, it is not necessary that the line should always pass through the origin. Under such conditions, it is more appropriate to use the
+regression type estimator to estimate the population means
+
+
+## Analysis
+
+### Step1: import dataset
+
+
+
+```{r}
+library(readxl)
+rare <- read_excel("C:/Users/mayur/Desktop/Mstat/tri sem 1/R/dataset/rare.xlsx")
+View(rare)
+attach(rare)
+```
+
+### Step2: Calling the Packages
+
+```{r}
+library(SDaA)
+library(survey)
+```
+
+## Ratio estimator:
+
+### Step3: Understanding the dataset
+
+```{r}
+head(rare)
+colnames(rare)
+nrow(rare)
+
+```
+
+##### Inference:
+thus we have 2 columns X,Y and 21 observations under each.
+
+### Step4: Plotting
+
+We can use scatterplot to understand the relationship between the X and Y variables
+```{r}
+plot(rare$x,rare$y, main="Scatterplot btw X and Y")
+```
+Now, Mr. John wants to estimate the
+average real estate farm loans assuming that the average nonreal
+estate farm loans in the country is known and is equal to $878.16.
+
+
+
+```{r}
+ratio=svydesign(ids=~1, weights = ~1, data = rare)
+svyratio(numerator = ~y, denominator = ~x, 
+         design = ratio)
+```
+### Step5:
+estimated mean and total using ratio estimator using(Rcap*Xbar) for y(bar)
+
+
+
+
+
+```{r}
+#estimated mean using ratio estimator
+0.6695023*878.16
+#estimated total using ratio estimator
+0.6695023*(878.16*21)
+
+# we had to assume the mean non real loans as 878.16 and number of observation as 21
+```
+Thus we get a mean estimation for real estate farm loans as 583.93 dollars and a 12346.53 dollars as the estimated total for real estate farm loans.
+
+### Step6: Confidence Interval
+
+We have to use t distribution since the sample size is less than 30 
+the value of t(alpha/2) with 20 DF {(N-1)df} is 2.086 using t table.
+
+
+```{r}
+r=mean(rare$y)/mean(rare$x)
+r
+v=var(rare$y)/var(rare$x)
+SE=sqrt(v)
+SE
+Upper_confidence_level=r+2.086*SE
+Upper_confidence_level
+Lower_confidence_level=r-2.086*SE
+Lower_confidence_level
+```
+Hence at 95% confidence level os 5% of level of significance the r value will lie between [0,1.67]
+
+## Regression Estimator
+
+### Step7: Estimate b value
+
+```{r}
+rerare=rare$x
+set.seed(123)
+reg_model=lm(y ~0+x, weights = rerare, data = rare)
+summary(reg_model)
+```
+Thus estimated b value is 0.39778 
+
+
+
+### Step8: Find population mean
+
+```{r}
+# now regression estimator is ybar_reg=ybar+b(Xbar-xbar)
+b=0.39778
+ybar=mean(rare$y)
+xbar=mean(rare$x)
+Xbar=878.16
+ybar
+xbar
+
+#estimated population mean using regression estimator
+ybar_reg=ybar+b*(Xbar-xbar)
+ybar_reg 
+```
+Estimated popultion mean is 593.6896.
+
+
+
+### Step9: To find standard error
+
+standard error- First find out the unbiased estimate of variance ybar_reg by using the formula and then take the square root of it. For this we need 
+r, N, n, sample mean square of y variable i.e. sy^2.
+
+note: 
+N=50
+n=21
+
+
+```{r}
+r=cor(rare$y,rare$x)
+N=50
+n=21
+sy2=var(rare$y)
+# Formula application
+v=((N-n)/(N*n))*(sy2-(r^2)*sy2)
+v
+SE=sqrt(v)
+SE
+```
+We observe that the population variance is 4639.497.
+and the population std deviation is 68.11386
+
+## Conclusion:
+the regression estimator is more efficient than that of ratio estimator because
+1) lesser variability 
+2) There is less no absolute linear relation between X and Y variable
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+```{r}
+
+```
+
+

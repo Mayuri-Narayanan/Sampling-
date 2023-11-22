@@ -1,0 +1,243 @@
+---
+title: "Stratified Sampling"
+author: "A.Mayuri(2348133)"
+date: "2023-09-12"
+output: word_document
+---
+## Question
+Consider a dataset as
+population of your choice and divide the population in various strata by
+choosing an appropriate variable of stratification.  Give the estimates of population
+parameters(mean and total) by taking a random sample of adequate size using the
+proportional allocation and optimum allocation methods. Write a report on it.
+
+## Data Description:
+The taken dataset gives a detailed description of loan defaults by customers on different kinds of auto-mobiles.
+the data is of large sample with N=200 customers in the past week
+
+
+## Objective: 
+To do a stratified analysis on the employee type ie(salaried/self employed)
+
+## Variables of Interest and their Definition:
+UniqueID-Identifier for customers
+loan_default-- Payment default in the first EMI on due date
+disbursed_amount--Amount of Loan disbursed
+asset_cost--Cost of the Asset
+ltv--Loan to Value of the asset
+branch_id--Branch where the loan was disbursed
+supplier_id--Vehicle Dealer where the loan was disbursed
+manufacturer_id--Vehicle manufacturer(Hero, Honda, TVS etc.)
+Employment.Type--Employment Type of the customer (Salaried/Self Employed)
+
+where we will do the analysis for 2 stratum ie, salaried=1, and stratum=0
+
+# ANALYSIS
+
+## Code
+
+### Step1: IMPORT DATASET
+To import the dataset that has been discussed above to initiat the analysis
+```{r }
+library(readxl)
+finb <- read_excel("C:/Users/mayur/Desktop/Mstat/tri sem 1/R/dataset/finb.xlsx")
+View(finb)
+attach(finb)
+
+
+```
+### Step2: IMPORT PACKAGE
+We are downloading the samplingbook package to proceed with the stratified sampling data analysis
+```{r }
+library(samplingbook)
+```
+### step3: CREATE STRATUMS
+Salaried =1 
+selfemployed =0
+
+this helps us to create stratums by assigning a binary code for saalaried and self employed
+
+```{r }
+# creating stratums . employment type= salaried
+stratum1=finb[finb$Employment.Type==1
+, ]
+stratum1
+
+```
+
+
+
+```{r }
+
+# creating stratums . employment type= self employed
+stratum2=finb[finb$Employment.Type==0
+, ]
+stratum2
+```
+
+### step4: CALCULATE
+mean and standard deviation for two variables disumbered amount and asset cost
+
+```{r }
+# calculation for N-stratum population size
+N1=sum(stratum1$Employment.Type==1)
+N1
+
+N2=sum(stratum2$Employment.Type==0)
+N2
+
+# mean calculation
+M1_disamount=mean(stratum1$disbursed_amount)
+M2_disamount=mean(stratum2$disbursed_amount)
+
+M1_ascost=mean(stratum1$asset_cost)
+M2_ascost=mean(stratum2$asset_cost)
+
+#std deviation calculation
+
+S1_disamount=sqrt(var(stratum1$disbursed_amount))
+S1_ascost=sqrt(var(stratum1$asset_cost))
+
+S2_disamount=sqrt(var(stratum2$disbursed_amount))
+S2_ascost=sqrt(var(stratum2$asset_cost))
+
+#output of mean and standard deviation for two variables disumbered amount and asset cost
+M1_disamount
+M1_ascost
+S1_ascost
+S1_disamount
+
+
+
+M2_disamount
+M2_ascost
+S2_ascost
+S2_disamount
+
+```
+
+## step5: PROPORTIONAL ALLOCATION
+
+let the sample of size n=10 has to be drawn using proportional allocation
+
+
+```{r }
+#let the sample of size n=10 has to be drawn using proportional allocation for asset cost
+
+sample_size_ascost=stratasamp(n=10, Nh=c(N1, N2), Sh=c(S1_ascost, S2_ascost), type="opt")
+sample_size_ascost
+
+#let the sample of size n=10 has to be drawn using proportional allocation for disumbersed amount
+
+sample_size_disamt=stratasamp(n=10, Nh=c(N1, N2), Sh=c(S1_disamount, S2_disamount), type="opt")
+sample_size_disamt
+```
+
+### Step6: determination of sample size
+
+1)proportional
+```{r }
+# determination of total sample size for given specified precision using proportion
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_ascost, S2_ascost), type='prop' )
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_disamount, S2_disamount), type='prop' )
+```
+
+2)Optimal
+
+```{r}
+# determination of total sample size for given specified precision using proportion
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_ascost, S2_ascost), type='opt' )
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_disamount, S2_disamount), type='opt' )
+```
+
+
+3) with precision
+```{r}
+# determination of total sample size for given specified precision and confidence level
+
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_ascost, S2_ascost),level=.99, type="opt" )
+
+
+stratasize(e=.1, Nh=c(N1, N2), Sh=c(S1_disamount, S2_disamount),level=.99, type="opt" )
+
+
+```
+### Step7: COLLECTION OF RANDOMN DATASET OF Size=5
+
+```{r}
+#collect a random sample of size 5,5 from both strata
+sample1=stratum1[sample(1:nrow(stratum1), 5, replace=FALSE), ]
+sample1 # sample 1 collected from stratum 1
+
+sample2=stratum2[sample(1:nrow(stratum2), 5, replace=FALSE), ]
+sample2 # sample 1 collected from stratum 2
+
+# total sample collected using stratified random sampling
+total_sampled_data=rbind(sample1, sample2)
+total_sampled_data
+```
+
+
+### step8: ESTIMATIONS
+
+```{r}
+#with optimum allocation
+
+# Estimation of population mean using stratified random sample
+
+nh2=as.vector(table(total_sampled_data$Employment.Type))
+nh2
+
+wh=nh2/sum(nh2)
+wh
+```
+
+1) Disbursed amount
+
+```{r}
+stratamean(y=total_sampled_data$disbursed_amount, h=as.vector(total_sampled_data$Employment.Type),
+wh=wh, eae=TRUE)
+
+
+stratamean(y=total_sampled_data$disbursed_amount, h=as.vector(total_sampled_data$Employment.Type),
+wh=wh)
+```
+Interpretation: 
+
+#### General interpretation:: 
+
+Thus by using stratified sampling we have deduced the  mean estimate of disbursed amount is of 49,212 rupees with a standard deviation of 1,590 rupees. also the mean estimate lied between [46095.51,52329.69] with a 95% confidence level.
+
+Salaried professionals have a mean estimate of   46,519.6 rupees as their disbursed amount with a std error of 2277.471 rupees.
+
+Self employed have a mean estimate of  51,905.6 rupees as their disbursed amount with a std error of 2220.445 rupees.
+
+
+# Conclusion :: 
+Here we can observe that self employed people will default more than that of salaried. this could be due to the uncertainty in income, which is higher in self employed individuals.
+
+
+2) Asset cost
+
+```{r}
+stratamean(y=total_sampled_data$asset_cost, h=as.vector(total_sampled_data$Employment.Type),
+wh=wh, eae=TRUE)
+
+
+stratamean(y=total_sampled_data$asset_cost, h=as.vector(total_sampled_data$Employment.Type),
+wh=wh)
+```
+Interpretation: 
+
+####General interpretation:: 
+
+Thus by using stratified sampling we have deduced the  mean estimate of asset cost is of 66,294.4 rupees with a standard deviation of 1,426.502 rupees. also the mean estimate lied between [63,498.51,69,090.29] with a 95% confidence level.
+
+Salaried professionals have a mean estimate of  68,050.2  rupees as their asset amount with a std error of 2,647.529 rupees.
+
+Self employed have a mean estimate of 64,538.6 rupees as their asset amount with a std error of 1,063.117rupees.
+
+
+### Conclusion :: 
+Here we can observe that self employed people will take loan of lower value than that of salaried. this could be due to the uncertainty in income, which is higher in self employed individuals.
+

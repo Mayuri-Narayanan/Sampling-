@@ -1,0 +1,161 @@
+---
+title: "HT AND YT Estimators(Lab 9)"
+author: "A.Mayuri(2348133)"
+date: "2023-09-26"
+output:
+  word_document: default
+  html_document: default
+---
+
+## About The Data:
+The result of sample survey on the number of bearing lime trees and the area reported under limes, in each of the 22 villages growing lime in one of the tehsils of Bangalore district, are given below:
+
+## Variable of Interest:
+Area Under lime(in acres): Gives the area under which the number of trees with limes are recorded.
+
+No. of bearing lime trees: is the head count of the number of lime trees in the region.
+
+
+## Objective:
+1. Give estimates for the average number of bearing lime tress using exact variance estimates-
+Horvitz-Thompson(HT) and Yates-Grundy(yt) and suggest which estimator is more efficient.
+
+2. Estimate total number of bearing lime trees using approximate variance estimates-Hansen-
+Hurwitz (HH) and Hajek(Ha) estimators along with the 95% confidence interval. Comment on
+which estimator provides the estimated total number of bearing lime trees with minimum
+bias and is more efficient among all 4 estimators.
+
+## ANALYSIS:
+
+### Step1:IMPORT DATASET
+```{r }
+library(readxl)
+lab <- read_excel("C:/Users/mayur/Desktop/Mstat/tri sem 1/R/dataset/lab.xlsx")
+View(lab)
+attach(lab)
+```
+## Step2: INITIATING THE LIBRARY
+```{r }
+library(samplingbook)
+summary(lab)
+```
+
+```{r }
+#Suppose we want to estimate the average area 
+#by considering the population as a auxiliary variable
+set.seed(123) # to fix the sample
+pps= pps.sampling(z=lab$`Area Under lime(in acres)`,n=20,
+method='midzuno')
+pps
+```
+
+
+```{r }
+sample= lab[pps$sample,]
+sample #selected sample using midzuno method
+```
+## HT and YT Estimate
+
+```{r }
+#HT estimate with different methods of variance estimation
+## Exact variance estimate-Horvitz-Thompson and Yates-Grundy
+
+N=nrow(lab)
+N
+PI=pps$PI
+PI #PI is the matrix of second order inclusion probabilities of sample
+```
+## Estimate Using Horvitz Thompson Method
+
+```{r }
+#1. Estimation of variance using Horvitz-Thompson
+htestimate(y=sample$`Area Under lime(in acres)`, N=N, PI=PI, method='ht')
+```
+The mean estimate of area under treest with lime are 22.59591 and wit variance 0.0212292
+
+```{r }
+#2. Estimation of variance using Yates and Grundy
+htestimate(sample$`Area Under lime(in acres)`, N=N, PI=PI, method='yg')
+```
+the mean estimate using yates and grundy is 22.59591 and the standard error is 5.170035e-18. which is lesser than that of HT method
+
+```{r }
+## Approximate variance estimate-Hansen-Hurwitz (HH) and Hajek(Ha).
+#1. Estimation of variance using Hansen-Hurwitz (HH)
+pk= pps$pik[pps$sample]
+pk#first order inclusion probabilities of sample units
+```
+
+
+```{r }
+htestimate(sample$`Area Under lime(in acres)`, N=N, pk=pk, method='hh')
+```
+
+
+```{r }
+#2. Estimation of variance using Hajek(Ha)
+pik=pps$pik
+pik #first order inclusion probabilities of length N for
+```
+
+
+```{r }
+#the population elements
+htestimate(sample$`Area Under lime(in acres)`, N=N, pk=pk, pik=pik, method='ha')
+```
+
+
+
+
+```{r }
+# Calculate confidence interval based on normal distribution
+#for number of cases i.e. estimated total number of influenza cases
+est.ht= htestimate(sample$`Area Under lime(in acres)`, N=N, PI=PI, method='ht')
+est.ht
+```
+
+
+
+```{r }
+est.ht$mean*N #estimated total number of trees
+```
+Thus the estimated total number of trees is 497.11
+
+
+
+
+```{r }
+lower = est.ht$mean*N - qnorm(0.975)*N*est.ht$se
+upper = est.ht$mean*N + qnorm(0.975)*N*est.ht$se
+c(lower,upper)
+```
+The confidence interval is  496.1946 498.0254
+
+```{r }
+# true number of area under cultivation
+sum(lab$`Area Under lime(in acres)`)
+```
+The population total is equal to that of the estimated total of the number of trees
+
+
+### Conclusion :
+
+HT:
+Mean estimator: 22.59591
+Standard Error: 0.0212292
+
+YG:
+
+Mean estimator: 22.59591
+Standard Error: 5.170035e-18
+
+HH:
+
+Mean estimator: 22.59591
+Standard Error: 6.875034
+
+HA:
+Mean estimator: 22.59591
+Standard Error: 4.677222e-18
+
+Thus HA Method of Hajek (approximate variance) is the best estimator of the four.

@@ -1,0 +1,75 @@
+---
+title: "PPSWR and Desraj estimstor"
+author: "A.Mayuri(2348133)"
+date: "2023-09-26"
+output: word_document
+---
+## About The Data:
+The result of sample survey on the number of bearing lime trees and the area reported under limes, in each of the 22 villages growing lime in one of the tehsils of Bangalore district, are given below:
+
+## Objective:
+1) From this population, select a sample of size 5 and with ppswor scheme and estimate the total number of bearing lime trees.
+2)using ordered Desraj estimator also give the bound on the error of estimation. 
+
+## Variable of Interest:
+Area Under lime(in acres): Gives the area under which the number of trees with limes are recorded.
+
+No. of bearing lime trees: is the head count of the number of lime trees in the region.
+
+## ANALYSIS:
+
+### Step1:IMPORT DATASET
+```{r }
+library(readxl)
+lab <- read_excel("C:/Users/mayur/Desktop/Mstat/tri sem 1/R/dataset/lab.xlsx")
+View(lab)
+attach(lab)
+```
+## Step2: INITIATING THE LIBRARY
+
+Calling the library and calculating the x,pi and thus creating the data1 table by binding pi with existing dataframe.
+
+```{r }
+library(samplingbook)
+library(fpest)
+data=data.frame(lab$`Area Under lime(in acres)`,lab$`No. of bearing lime trees`)
+data
+
+
+X=sum(lab$`Area Under lime(in acres)`)
+X
+pi=lab$`Area Under lime(in acres)`/X
+pi
+data1=cbind(lab, pi)
+data1
+```
+## Step 3: SAMPLE SELECTION
+
+using PPSWOR method to create a sample of size 5.
+
+```{r }
+set.seed(123)
+pps_wor=data1[sample(1:nrow(data1), 5, replace=FALSE), ]
+pps_wor
+```
+Thus we have deduced a randomn sample of size 5 with ppsrswor
+
+Step4: DESRAJ ESTIMATOR
+
+```{r }
+desraj(pps_wor$`No. of bearing lime trees`, pps_wor$pi)
+```
+
+## Step5: CALCULATE BOUND OF ERROR
+
+```{r }
+var=210519342
+se<-sqrt(var)
+se #standard error
+
+bound_error<-2*sqrt(var)
+bound_error     #bound-on error
+```
+
+
+Conclusion/Interpretation: - The analysis shows that the estimation of the total no. of bearing lime trees in the population is 27427 trees with the variance on the estimated value as 210519342 or an SD of 145709.28. The bound-on error estimate is 29018.57. So, we can say that almost about 27427 total no. of trees are in 22 villages growing lime in one of the Bangalore districts.
